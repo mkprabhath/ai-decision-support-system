@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Decision Support System</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 40px;
+    }
+    .card {
+      background: #fff;
+      padding: 25px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      margin-top: 15px;
+      display: block;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    pre {
+      margin-top: 20px;
+      background: #eee;
+      padding: 15px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>AI Decision Support System</h2>
+
+    <label>Demand (0–10)</label>
+    <input type="number" id="demand" value="5" min="0" max="10">
+
+    <label>Cost (0–10)</label>
+    <input type="number" id="cost" value="5" min="0" max="10">
+
+    <label>Risk (0–10)</label>
+    <input type="number" id="risk" value="5" min="0" max="10">
+
+    <button onclick="getDecision()">Get Decision</button>
+
+    <pre id="result">Waiting for input...</pre>
+  </div>
+
+  <script>
+    async function getDecision() {
+      const result = document.getElementById("result");
+      result.textContent = "Fetching decision...";
+
+      try {
+        const response = await fetch("http://localhost:5000/api/decision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            demand: Number(demand.value),
+            cost: Number(cost.value),
+            risk: Number(risk.value)
+          })
+        });
+
+        const data = await response.json();
+        result.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        result.textContent =
+          "❌ Backend not reachable.\n\n" +
+          "1. Make sure backend is running\n" +
+          "2. Run: node index.js\n" +
+          "3. Backend must be on port 5000";
+      }
+    }
+  </script>
+</body>
+</html>
