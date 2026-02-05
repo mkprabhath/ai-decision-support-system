@@ -5,93 +5,105 @@
   <title>AI Decision Support System</title>
   <style>
     body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
       font-family: Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .container {
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 12px;
-      width: 360px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      background: white;
+      width: 420px;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
     }
 
     h2 {
-      text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     input, button {
       width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      font-size: 14px;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 15px;
     }
 
     button {
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
       background: #1e3c72;
       color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
       font-weight: bold;
     }
 
-    .result {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    .Proceed { background: #d4edda; color: #155724; }
-    .Review  { background: #fff3cd; color: #856404; }
-    .Avoid   { background: #f8d7da; color: #721c24; }
+    .avoid { background: #fde2e2; color: #8b0000; }
+    .review { background: #fff3cd; color: #8a6d3b; }
+    .proceed { background: #e6f4ea; color: #1e7e34; }
+    .error { background: #f8d7da; color: #721c24; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>AI Decision Support System</h2>
+<div class="container">
+  <h2>AI Decision Support System</h2>
 
-    <input id="demand" type="number" placeholder="Demand (0–100)">
-    <input id="cost" type="number" placeholder="Cost (0–100)">
-    <input id="risk" type="number" placeholder="Risk (0–100)">
+  <input id="demand" type="number" placeholder="Demand (0–100)">
+  <input id="cost" type="number" placeholder="Cost (0–100)">
+  <input id="risk" type="number" placeholder="Risk (0–100)">
 
-    <button onclick="getDecision()">Get Decision</button>
+  <button onclick="getDecision()">Get Decision</button>
 
-    <div id="result"></div>
-  </div>
+  <div id="result"></div>
+</div>
 
-  <script>
-    async function getDecision() {
-      const demand = document.getElementById("demand").value;
-      const cost = document.getElementById("cost").value;
-      const risk = document.getElementById("risk").value;
+<script>
+async function getDecision() {
+  const demand = document.getElementById("demand").value;
+  const cost = document.getElementById("cost").value;
+  const risk = document.getElementById("risk").value;
 
-      const res = await fetch("http://localhost:5001/decision", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ demand, cost, risk })
-      });
+  const resultBox = document.getElementById("result");
 
-      const data = await res.json();
+  // ✅ VALIDATION
+  if (demand === "" || cost === "" || risk === "") {
+    resultBox.style.display = "block";
+    resultBox.className = "error";
+    resultBox.innerHTML = "⚠️ Please enter all values before getting a decision.";
+    return;
+  }
 
-      const resultDiv = document.getElementById("result");
-      resultDiv.className = `result ${data.decision}`;
-      resultDiv.innerHTML = `
-        <strong>Decision:</strong> ${data.decision}<br>
-        <strong>Confidence:</strong> ${data.confidence}%<br>
-        <strong>Reason:</strong> ${data.reason}
-      `;
-    }
-  </script>
+  const response = await fetch("http://localhost:5001/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ demand, cost, risk })
+  });
+
+  const data = await response.json();
+
+  resultBox.style.display = "block";
+  resultBox.className = data.decision.toLowerCase();
+
+  resultBox.innerHTML = `
+    Decision: ${data.decision}<br>
+    Confidence: ${data.confidence}%<br>
+    Reason: ${data.reason}
+  `;
+}
+</script>
 
 </body>
 </html>
