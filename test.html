@@ -3,78 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <title>AI Decision Support System</title>
-
   <style>
-    /* ===== Page background ===== */
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #e8f0ff, #f5f7fb);
       margin: 0;
-      padding: 40px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: Arial, sans-serif;
     }
 
-    /* ===== Main card ===== */
     .container {
-      background: white;
-      max-width: 500px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      width: 360px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     input, button {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
-      font-size: 16px;
+      font-size: 14px;
     }
 
     button {
       cursor: pointer;
       border: none;
-      background: #2563eb;
-      color: white;
-      border-radius: 5px;
-    }
-
-    button:hover {
-      background: #1e40af;
-    }
-
-    /* ===== Result boxes ===== */
-    .result {
-      margin-top: 20px;
-      padding: 15px;
       border-radius: 6px;
-      font-size: 16px;
+      background: #1e3c72;
+      color: white;
+      font-weight: bold;
     }
 
-    .proceed {
-      background: #ecfdf5;
-      border-left: 6px solid #10b981;
-      color: #065f46;
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
     }
 
-    .review {
-      background: #fff7ed;
-      border-left: 6px solid #f97316;
-      color: #9a3412;
-    }
-
-    .avoid {
-      background: #fef2f2;
-      border-left: 6px solid #ef4444;
-      color: #991b1b;
-    }
+    .Proceed { background: #d4edda; color: #155724; }
+    .Review  { background: #fff3cd; color: #856404; }
+    .Avoid   { background: #f8d7da; color: #721c24; }
   </style>
 </head>
-
 <body>
 
   <div class="container">
@@ -91,24 +71,24 @@
 
   <script>
     async function getDecision() {
-      const demand = Number(document.getElementById("demand").value);
-      const cost = Number(document.getElementById("cost").value);
-      const risk = Number(document.getElementById("risk").value);
+      const demand = document.getElementById("demand").value;
+      const cost = document.getElementById("cost").value;
+      const risk = document.getElementById("risk").value;
 
-      const response = await fetch("http://localhost:5001/decision", {
+      const res = await fetch("http://localhost:5001/decision", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ demand, cost, risk })
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
       const resultDiv = document.getElementById("result");
-      resultDiv.className = "result " + data.decision.toLowerCase();
+      resultDiv.className = `result ${data.decision}`;
       resultDiv.innerHTML = `
         <strong>Decision:</strong> ${data.decision}<br>
-        <strong>Reason:</strong> ${data.reason}<br>
-        <strong>Score:</strong> ${data.score}
+        <strong>Confidence:</strong> ${data.confidence}%<br>
+        <strong>Reason:</strong> ${data.reason}
       `;
     }
   </script>
