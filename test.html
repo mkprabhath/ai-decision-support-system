@@ -1,69 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>AI Decision Support System</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      min-height: 100vh;
-      margin: 0;
       background: linear-gradient(135deg, #1e3c72, #2a5298);
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-
-    .container {
+    .card {
       background: white;
-      width: 420px;
       padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 400px;
+      border-radius: 12px;
       text-align: center;
     }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
     input, button {
       width: 100%;
       padding: 12px;
-      margin: 10px 0;
-      font-size: 15px;
+      margin-top: 10px;
+      font-size: 16px;
     }
-
     button {
       background: #1e3c72;
       color: white;
       border: none;
-      border-radius: 6px;
       cursor: pointer;
     }
-
     #result {
       margin-top: 20px;
       padding: 15px;
       border-radius: 8px;
       display: none;
-      font-weight: bold;
     }
-
-    .avoid { background: #fde2e2; color: #8b0000; }
-    .review { background: #fff3cd; color: #8a6d3b; }
-    .proceed { background: #e6f4ea; color: #1e7e34; }
-    .error { background: #f8d7da; color: #721c24; }
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="card">
   <h2>AI Decision Support System</h2>
 
-  <input id="demand" type="number" placeholder="Demand (0–100)">
-  <input id="cost" type="number" placeholder="Cost (0–100)">
-  <input id="risk" type="number" placeholder="Risk (0–100)">
+  <input type="number" id="demand" placeholder="Demand (0–100)" />
+  <input type="number" id="cost" placeholder="Cost (0–100)" />
+  <input type="number" id="risk" placeholder="Risk (0–100)" />
 
   <button onclick="getDecision()">Get Decision</button>
 
@@ -75,33 +59,46 @@ async function getDecision() {
   const demand = document.getElementById("demand").value;
   const cost = document.getElementById("cost").value;
   const risk = document.getElementById("risk").value;
+  const resultDiv = document.getElementById("result");
 
-  const resultBox = document.getElementById("result");
-
-  // ✅ VALIDATION
   if (demand === "" || cost === "" || risk === "") {
-    resultBox.style.display = "block";
-    resultBox.className = "error";
-    resultBox.innerHTML = "⚠️ Please enter all values before getting a decision.";
+    resultDiv.style.display = "block";
+    resultDiv.style.background = "#f8d7da";
+    resultDiv.innerHTML = "⚠️ Please enter all values.";
     return;
   }
 
-  const response = await fetch("http://localhost:5001/decision", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ demand, cost, risk })
-  });
+  try {
+    const response = await fetch("http://localhost:5001/decision", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        demand: Number(demand),
+        cost: Number(cost),
+        risk: Number(risk)
+      })
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  resultBox.style.display = "block";
-  resultBox.className = data.decision.toLowerCase();
+    resultDiv.style.display = "block";
+    resultDiv.style.background =
+      data.decision === "Proceed"
+        ? "#d4edda"
+        : data.decision === "Avoid"
+        ? "#f8d7da"
+        : "#fff3cd";
 
-  resultBox.innerHTML = `
-    Decision: ${data.decision}<br>
-    Confidence: ${data.confidence}%<br>
-    Reason: ${data.reason}
-  `;
+    resultDiv.innerHTML = `
+      <strong>Decision:</strong> ${data.decision}<br>
+      <strong>Confidence:</strong> ${data.confidence}%<br>
+      <strong>Reason:</strong> ${data.reason}
+    `;
+  } catch (err) {
+    resultDiv.style.display = "block";
+    resultDiv.style.background = "#f8d7da";
+    resultDiv.innerHTML = "❌ Backend not reachable";
+  }
 }
 </script>
 
